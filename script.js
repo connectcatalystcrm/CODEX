@@ -394,6 +394,7 @@ function startBattle(enemy) {
   el.playerHp.value = state.encounter.playerHp;
   el.enemyHp.value = state.encounter.enemyHp;
   el.battleModal.classList.remove("hidden");
+  el.battleModal.hidden = false;
 }
 
 function battleTurn(action) {
@@ -440,6 +441,7 @@ function endBattle(message) {
   setTimeout(() => {
     state.encounter = null;
     el.battleModal.classList.add("hidden");
+    el.battleModal.hidden = true;
   }, 600);
 }
 
@@ -546,5 +548,8 @@ el.runBtn.addEventListener("click", () => battleTurn("run"));
 
 window.addEventListener("keydown", (e) => keys.add(e.key.toLowerCase()));
 window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+
+el.battleModal.classList.add("hidden");
+el.battleModal.hidden = true;
 
 renderQuestion();

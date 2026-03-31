@@ -167,3 +167,6 @@ progress { width: 100%; }
 @media (max-width: 900px) {
   .hud-grid { grid-template-columns: 1fr; }
 }
+
+
+.hidden, [hidden] { display: none !important; }
