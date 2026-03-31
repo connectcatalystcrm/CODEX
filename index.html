@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spirit Animal Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>Spirit Animal Explorer</h1>
+    <section id="quiz" class="panel active" aria-live="polite">
+      <h2>Find Your Animal</h2>
+      <p>Answer a few questions to discover your spirit animal, then roam the world as that creature.</p>
+      <form id="quiz-form"></form>
+      <button id="start-btn" class="primary">Discover My Animal</button>
+    </section>
+
+    <section id="result" class="panel" aria-live="polite">
+      <h2>Your Animal Character</h2>
+      <div id="animal-card"></div>
+      <button id="play-btn" class="primary">Enter the World</button>
+      <button id="retake-btn">Retake Quiz</button>
+    </section>
+
+    <section id="game" class="panel" aria-live="polite">
+      <h2>Explore the Habitat</h2>
+      <div class="hud">
+        <span id="animal-name"></span>
+        <span id="position"></span>
+      </div>
+      <canvas id="world" width="640" height="420"></canvas>
+      <p class="help">Use arrow keys or WASD to move. Visit every city and village of each animal tribe!</p>
+      <ul id="discoveries"></ul>
+      <button id="restart-btn">Play Again</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
