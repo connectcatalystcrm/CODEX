@@ -1,291 +1,550 @@
+const WORLD_SIZE = 30000;
+const VIEW_W = 1280;
+const VIEW_H = 720;
+
 const questions = [
   {
-    key: "time",
-    text: "What time of day gives you the most energy?",
-    answers: [
-      { label: "Early morning", scores: { deer: 2, eagle: 1, wolf: 1 } },
-      { label: "Sunny afternoon", scores: { dolphin: 2, tiger: 1, fox: 1 } },
-      { label: "Nighttime", scores: { owl: 2, tiger: 1, wolf: 2 } },
-      { label: "Anytime if I am moving", scores: { horse: 2, fox: 1 } },
+    q: "When conflict appears, what is your instinct?",
+    options: [
+      { text: "Observe and gather information", score: { owl: 2, fox: 1 } },
+      { text: "Lead from the front", score: { tiger: 2, bear: 1 } },
+      { text: "Coordinate the group", score: { wolf: 2, horse: 1 } },
+      { text: "Defuse and negotiate", score: { dolphin: 2, deer: 1 } },
     ],
   },
   {
-    key: "style",
-    text: "How do you handle challenges?",
-    answers: [
-      { label: "Careful and patient", scores: { owl: 2, deer: 1, bear: 1 } },
-      { label: "Bold and direct", scores: { tiger: 2, bear: 2 } },
-      { label: "Creative and playful", scores: { dolphin: 2, fox: 2 } },
-      { label: "Strategic teamwork", scores: { wolf: 2, eagle: 1, horse: 1 } },
+    q: "Pick your ideal home biome.",
+    options: [
+      { text: "Glacial peaks", score: { eagle: 2, wolf: 1 } },
+      { text: "Mystic forest", score: { deer: 2, owl: 1, fox: 1 } },
+      { text: "Volcanic frontier", score: { tiger: 2, bear: 1 } },
+      { text: "Coastal plains", score: { dolphin: 2, horse: 1 } },
     ],
   },
   {
-    key: "home",
-    text: "Pick your ideal place to relax:",
-    answers: [
-      { label: "Forest trail", scores: { deer: 2, owl: 1, fox: 1 } },
-      { label: "Mountain peak", scores: { eagle: 2, tiger: 1, bear: 1 } },
-      { label: "Ocean cove", scores: { dolphin: 3 } },
-      { label: "Open grasslands", scores: { horse: 2, wolf: 1 } },
+    q: "Your best battle style?",
+    options: [
+      { text: "Fast precision strikes", score: { fox: 2, eagle: 1 } },
+      { text: "Heavy power attacks", score: { bear: 2, tiger: 1 } },
+      { text: "Team-combo tactics", score: { wolf: 2, dolphin: 1 } },
+      { text: "Mobility and evasion", score: { horse: 2, deer: 1 } },
     ],
   },
   {
-    key: "team",
-    text: "What role do you naturally take in a group?",
-    answers: [
-      { label: "Quiet observer", scores: { owl: 2, eagle: 1 } },
-      { label: "Encouraging friend", scores: { dolphin: 2, deer: 1, horse: 1 } },
-      { label: "Protective leader", scores: { tiger: 2, bear: 2 } },
-      { label: "Scout and communicator", scores: { fox: 2, wolf: 2 } },
+    q: "How do you earn trust?",
+    options: [
+      { text: "Quiet reliability", score: { owl: 2, deer: 1 } },
+      { text: "Courage under pressure", score: { tiger: 2, eagle: 1 } },
+      { text: "Smart diplomacy", score: { fox: 2, dolphin: 1 } },
+      { text: "Guarding the group", score: { bear: 2, wolf: 1 } },
+    ],
+  },
+  {
+    q: "What legacy do you want?",
+    options: [
+      { text: "A peaceful alliance", score: { dolphin: 2, horse: 1 } },
+      { text: "A legendary warrior clan", score: { tiger: 2, bear: 1 } },
+      { text: "A thriving adaptive kingdom", score: { fox: 2, wolf: 1 } },
+      { text: "A wise and stable realm", score: { owl: 2, eagle: 1, deer: 1 } },
     ],
   },
 ];
 
-const animalData = {
-  owl: { name: "Owl", emoji: "🦉", blurb: "Wise, observant, and calm under pressure.", speed: 2.2, color: "#64748b", region: "Moonwood" },
-  tiger: { name: "Tiger", emoji: "🐅", blurb: "Brave, focused, and always ready to act.", speed: 2.9, color: "#f97316", region: "Sunscar Jungle" },
-  dolphin: { name: "Dolphin", emoji: "🐬", blurb: "Playful, social, and highly adaptable.", speed: 3.3, color: "#0ea5e9", region: "Azure Coast" },
-  deer: { name: "Deer", emoji: "🦌", blurb: "Gentle, intuitive, and quick to respond.", speed: 2.7, color: "#a16207", region: "Emerald Glades" },
-  eagle: { name: "Eagle", emoji: "🦅", blurb: "Visionary, independent, and determined.", speed: 3.0, color: "#334155", region: "Highwind Peaks" },
-  wolf: { name: "Wolf", emoji: "🐺", blurb: "Loyal, tactical, and strongest with a pack.", speed: 3.1, color: "#475569", region: "Frostpine Range" },
-  fox: { name: "Fox", emoji: "🦊", blurb: "Clever, adaptable, and quick-thinking.", speed: 3.2, color: "#ea580c", region: "Maple Hollow" },
-  bear: { name: "Bear", emoji: "🐻", blurb: "Steady, protective, and quietly powerful.", speed: 2.4, color: "#7c2d12", region: "Stonebark Wilds" },
-  horse: { name: "Horse", emoji: "🐎", blurb: "Energetic, resilient, and freedom-loving.", speed: 3.4, color: "#92400e", region: "Golden Steppe" },
+const animals = {
+  owl: { name: "Owl", emoji: "🦉", speed: 280, atk: 16, def: 7, skill: "Night Insight" },
+  tiger: { name: "Tiger", emoji: "🐅", speed: 320, atk: 20, def: 6, skill: "Pounce" },
+  dolphin: { name: "Dolphin", emoji: "🐬", speed: 340, atk: 15, def: 8, skill: "Wave Pulse" },
+  deer: { name: "Deer", emoji: "🦌", speed: 300, atk: 14, def: 9, skill: "Grace Dash" },
+  eagle: { name: "Eagle", emoji: "🦅", speed: 335, atk: 18, def: 6, skill: "Sky Cut" },
+  wolf: { name: "Wolf", emoji: "🐺", speed: 330, atk: 17, def: 8, skill: "Pack Hunt" },
+  fox: { name: "Fox", emoji: "🦊", speed: 345, atk: 16, def: 7, skill: "Trickstep" },
+  bear: { name: "Bear", emoji: "🐻", speed: 260, atk: 22, def: 12, skill: "Earth Slam" },
+  horse: { name: "Horse", emoji: "🐎", speed: 360, atk: 15, def: 7, skill: "Stampede" },
 };
 
-const WORLD_SCALE = 20;
-const VIEW_WIDTH = 640;
-const VIEW_HEIGHT = 420;
-const WORLD_WIDTH = VIEW_WIDTH * WORLD_SCALE;
-const WORLD_HEIGHT = VIEW_HEIGHT * WORLD_SCALE;
-
-const regions = [
-  { name: "Moonwood", color: "#dbeafe", x: 0, y: 0, w: 4200, h: 2600 },
-  { name: "Sunscar Jungle", color: "#fde68a", x: 4200, y: 0, w: 4300, h: 3000 },
-  { name: "Azure Coast", color: "#bfdbfe", x: 8500, y: 0, w: 4300, h: 2800 },
-  { name: "Emerald Glades", color: "#bbf7d0", x: 0, y: 2600, w: 3900, h: 2800 },
-  { name: "Highwind Peaks", color: "#cbd5e1", x: 3900, y: 3000, w: 3000, h: 2500 },
-  { name: "Frostpine Range", color: "#e2e8f0", x: 6900, y: 2800, w: 3000, h: 3000 },
-  { name: "Stonebark Wilds", color: "#fecaca", x: 9900, y: 2800, w: 2900, h: 2600 },
-  { name: "Golden Steppe", color: "#fef08a", x: 0, y: 5400, w: 5600, h: 3000 },
-  { name: "Maple Hollow", color: "#fed7aa", x: 5600, y: 5800, w: 7200, h: 2600 },
+const biomes = [
+  { name: "Sun Grasslands", x: 0, y: 0, w: 9000, h: 8000, color: "#bef264", grass: true },
+  { name: "Moonwood", x: 9000, y: 0, w: 7000, h: 9000, color: "#86efac", grass: true },
+  { name: "Storm Ridge", x: 16000, y: 0, w: 7000, h: 9000, color: "#cbd5e1", grass: false },
+  { name: "Cinderwild", x: 23000, y: 0, w: 7000, h: 9000, color: "#fdba74", grass: false },
+  { name: "Azure Coast", x: 0, y: 8000, w: 12000, h: 7000, color: "#7dd3fc", grass: true },
+  { name: "Iron Steppe", x: 12000, y: 9000, w: 10000, h: 9000, color: "#fef08a", grass: true },
+  { name: "Frost Reach", x: 22000, y: 9000, w: 8000, h: 8000, color: "#bfdbfe", grass: false },
+  { name: "Warfront Basin", x: 5000, y: 17000, w: 12000, h: 7000, color: "#fca5a5", grass: true },
+  { name: "Maple Dominion", x: 17000, y: 17000, w: 13000, h: 13000, color: "#fdba74", grass: true },
+  { name: "Great Delta", x: 0, y: 24000, w: 17000, h: 6000, color: "#67e8f9", grass: false },
 ];
 
-const settlements = [
-  { name: "Nightfeather City", tribe: "Owls", type: "City", x: 1200, y: 900, r: 120, color: "#6366f1" },
-  { name: "Starlit Perch", tribe: "Owls", type: "Village", x: 2200, y: 1700, r: 90, color: "#818cf8" },
-  { name: "Amberclaw City", tribe: "Tigers", type: "City", x: 5900, y: 1200, r: 120, color: "#f97316" },
-  { name: "Sunfang Village", tribe: "Tigers", type: "Village", x: 7200, y: 2200, r: 90, color: "#fb923c" },
-  { name: "Tidecall City", tribe: "Dolphins", type: "City", x: 9800, y: 1300, r: 120, color: "#0ea5e9" },
-  { name: "Coral Song Village", tribe: "Dolphins", type: "Village", x: 11400, y: 2100, r: 90, color: "#38bdf8" },
-  { name: "Mossheart City", tribe: "Deer", type: "City", x: 1200, y: 3600, r: 120, color: "#a16207" },
-  { name: "Willowrun Village", tribe: "Deer", type: "Village", x: 2800, y: 4700, r: 90, color: "#b45309" },
-  { name: "Skycrest City", tribe: "Eagles", type: "City", x: 4800, y: 3900, r: 120, color: "#334155" },
-  { name: "Cloudspire Village", tribe: "Eagles", type: "Village", x: 6100, y: 5000, r: 90, color: "#64748b" },
-  { name: "Fangmoon City", tribe: "Wolves", type: "City", x: 7600, y: 3900, r: 120, color: "#475569" },
-  { name: "Pinehowl Village", tribe: "Wolves", type: "Village", x: 9000, y: 5000, r: 90, color: "#64748b" },
-  { name: "Embertrail City", tribe: "Foxes", type: "City", x: 8200, y: 7000, r: 120, color: "#ea580c" },
-  { name: "Lanterntail Village", tribe: "Foxes", type: "Village", x: 11200, y: 7600, r: 90, color: "#f97316" },
-  { name: "Ironroot City", tribe: "Bears", type: "City", x: 10500, y: 3900, r: 120, color: "#7c2d12" },
-  { name: "Cinderpaw Village", tribe: "Bears", type: "Village", x: 11750, y: 5200, r: 90, color: "#9a3412" },
-  { name: "Windmane City", tribe: "Horses", type: "City", x: 2200, y: 6600, r: 120, color: "#b45309" },
-  { name: "Prairielight Village", tribe: "Horses", type: "Village", x: 4300, y: 7600, r: 90, color: "#92400e" },
+const factions = [
+  { name: "Sky Parliament", stance: 10, color: "#60a5fa" },
+  { name: "Claw Dominion", stance: -8, color: "#f97316" },
+  { name: "River Accord", stance: 15, color: "#22d3ee" },
+  { name: "Stone Pact", stance: -3, color: "#a78bfa" },
+  { name: "Steppe Confederacy", stance: 4, color: "#f59e0b" },
 ];
 
-const quizPanel = document.getElementById("quiz");
-const resultPanel = document.getElementById("result");
-const gamePanel = document.getElementById("game");
-const form = document.getElementById("quiz-form");
-const startBtn = document.getElementById("start-btn");
-const playBtn = document.getElementById("play-btn");
-const retakeBtn = document.getElementById("retake-btn");
-const restartBtn = document.getElementById("restart-btn");
-const animalCard = document.getElementById("animal-card");
-const animalName = document.getElementById("animal-name");
-const positionEl = document.getElementById("position");
-const discoveriesEl = document.getElementById("discoveries");
-const canvas = document.getElementById("world");
-const ctx = canvas.getContext("2d");
+const settlements = Array.from({ length: 45 }).map((_, i) => {
+  const faction = factions[i % factions.length];
+  const biome = biomes[i % biomes.length];
+  const isCity = i % 3 === 0;
+  const x = biome.x + 1000 + (i * 913) % Math.max(1500, biome.w - 1800);
+  const y = biome.y + 900 + (i * 631) % Math.max(1300, biome.h - 1600);
+  return {
+    name: `${faction.name.split(" ")[0]} ${isCity ? "City" : "Village"} ${i + 1}`,
+    type: isCity ? "City" : "Village",
+    faction: faction.name,
+    x,
+    y,
+    radius: isCity ? 130 : 95,
+    color: faction.color,
+    questGiven: false,
+  };
+});
 
-let currentAnimalKey = null;
-let gameState = null;
+let questCounter = 1;
+
+const state = {
+  quizIndex: 0,
+  answers: Array(questions.length).fill(null),
+  playerAnimal: null,
+  game: null,
+  encounter: null,
+};
+
+const el = {
+  quiz: document.getElementById("quiz"),
+  result: document.getElementById("result"),
+  game: document.getElementById("game"),
+  questionCard: document.getElementById("question-card"),
+  progressLabel: document.getElementById("progress-label"),
+  progressFill: document.getElementById("progress-fill"),
+  backBtn: document.getElementById("back-btn"),
+  nextBtn: document.getElementById("next-btn"),
+  animalCard: document.getElementById("animal-card"),
+  playBtn: document.getElementById("play-btn"),
+  retakeBtn: document.getElementById("retake-btn"),
+  restartBtn: document.getElementById("restart-btn"),
+  playerName: document.getElementById("player-name"),
+  coords: document.getElementById("coords"),
+  regionName: document.getElementById("region-name"),
+  realmStatus: document.getElementById("realm-status"),
+  questList: document.getElementById("quest-list"),
+  politicsList: document.getElementById("politics-list"),
+  eventLog: document.getElementById("event-log"),
+  canvas: document.getElementById("world"),
+  fsBtn: document.getElementById("toggle-fullscreen"),
+  battleModal: document.getElementById("battle-modal"),
+  battleTitle: document.getElementById("battle-title"),
+  battleDesc: document.getElementById("battle-desc"),
+  playerHp: document.getElementById("player-hp"),
+  enemyHp: document.getElementById("enemy-hp"),
+  attackBtn: document.getElementById("attack-btn"),
+  skillBtn: document.getElementById("skill-btn"),
+  runBtn: document.getElementById("run-btn"),
+};
+
+const ctx = el.canvas.getContext("2d");
 const keys = new Set();
 
-function renderQuiz() {
-  form.innerHTML = "";
-  questions.forEach((q, i) => {
-    const block = document.createElement("fieldset");
-    block.className = "question";
-    block.innerHTML = `<legend>${i + 1}. ${q.text}</legend>`;
-    q.answers.forEach((answer, idx) => {
-      const label = document.createElement("label");
-      label.innerHTML = `<input type="radio" name="${q.key}" value="${idx}" required /> ${answer.label}`;
-      block.appendChild(label);
-    });
-    form.appendChild(block);
-  });
-}
-
-function determineAnimal() {
-  const score = Object.fromEntries(Object.keys(animalData).map((k) => [k, 0]));
-  for (const q of questions) {
-    const selected = form.querySelector(`input[name="${q.key}"]:checked`);
-    if (!selected) return null;
-    const answer = q.answers[Number(selected.value)];
-    Object.entries(answer.scores).forEach(([animal, points]) => {
-      score[animal] += points;
-    });
-  }
-  return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0];
-}
-
 function switchPanel(target) {
-  [quizPanel, resultPanel, gamePanel].forEach((p) => p.classList.remove("active"));
+  [el.quiz, el.result, el.game].forEach((p) => p.classList.remove("active"));
   target.classList.add("active");
 }
 
-function showResult(animalKey) {
-  currentAnimalKey = animalKey;
-  const data = animalData[animalKey];
-  animalCard.innerHTML = `
-    <strong>${data.emoji} ${data.name}</strong>
-    <span>${data.blurb}</span>
-    <span>Homeland: ${data.region}</span>
-    <span>Travel speed: ${data.speed.toFixed(1)} tiles/sec</span>
-    <span>World size: ${WORLD_WIDTH} x ${WORLD_HEIGHT} (20x larger than before)</span>
+function renderQuestion() {
+  const q = questions[state.quizIndex];
+  el.progressLabel.textContent = `Question ${state.quizIndex + 1} / ${questions.length}`;
+  el.progressFill.style.width = `${((state.quizIndex + 1) / questions.length) * 100}%`;
+  el.questionCard.innerHTML = `<h2>${q.q}</h2>`;
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = `choice ${state.answers[state.quizIndex] === idx ? "active" : ""}`;
+    btn.textContent = opt.text;
+    btn.addEventListener("click", () => {
+      state.answers[state.quizIndex] = idx;
+      renderQuestion();
+    });
+    el.questionCard.appendChild(btn);
+  });
+  el.backBtn.disabled = state.quizIndex === 0;
+  el.nextBtn.textContent = state.quizIndex === questions.length - 1 ? "Reveal Champion" : "Next";
+}
+
+function computeAnimal() {
+  const score = Object.fromEntries(Object.keys(animals).map((k) => [k, 0]));
+  questions.forEach((q, qi) => {
+    const selected = state.answers[qi];
+    if (selected == null) return;
+    Object.entries(q.options[selected].score).forEach(([k, v]) => (score[k] += v));
+  });
+  return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function showResult() {
+  const key = computeAnimal();
+  state.playerAnimal = key;
+  const a = animals[key];
+  el.animalCard.innerHTML = `
+    <strong>${a.emoji} ${a.name}</strong>
+    <span>Speed: ${a.speed} | Attack: ${a.atk} | Defense: ${a.def}</span>
+    <span>Signature Skill: ${a.skill}</span>
+    <span>Realm Scale: ${WORLD_SIZE.toLocaleString()} x ${WORLD_SIZE.toLocaleString()}</span>
   `;
-  switchPanel(resultPanel);
+  switchPanel(el.result);
 }
 
 function initGame() {
-  const data = animalData[currentAnimalKey];
-  const home = settlements.find((s) => s.tribe.toLowerCase().startsWith(data.name.toLowerCase().slice(0, 3))) || settlements[0];
-  gameState = {
-    x: home.x,
-    y: home.y,
-    speed: data.speed,
-    discovered: new Set(),
+  const a = animals[state.playerAnimal];
+  state.game = {
+    x: WORLD_SIZE / 2,
+    y: WORLD_SIZE / 2,
+    hp: 100,
     cameraX: 0,
     cameraY: 0,
-    last: performance.now(),
-    won: false,
+    speed: a.speed,
+    atk: a.atk,
+    def: a.def,
+    animationTick: 0,
+    quests: [],
+    logs: ["Entered the realm."],
+    discovered: new Set(),
+    inBattle: false,
+    lastFrame: performance.now(),
+    lastWarTick: performance.now(),
+    lastEncounter: performance.now(),
   };
-  animalName.textContent = `${data.emoji} ${data.name}`;
-  discoveriesEl.innerHTML = settlements.map((s) => `<li data-name="${s.name}">❔ ${s.name} (${s.tribe} ${s.type})</li>`).join("");
-  switchPanel(gamePanel);
+
+  el.playerName.textContent = `${a.emoji} ${a.name}`;
+  switchPanel(el.game);
+  renderQuestLog();
+  renderPolitics();
+  renderEvents();
   requestAnimationFrame(loop);
 }
 
-function getCurrentRegion() {
-  return regions.find((r) => gameState.x >= r.x && gameState.x < r.x + r.w && gameState.y >= r.y && gameState.y < r.y + r.h)?.name || "Wilderness";
+function getBiome(x, y) {
+  return biomes.find((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h) || biomes[0];
 }
 
-function drawWorld() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function renderWorld() {
+  const g = state.game;
+  g.cameraX = Math.max(0, Math.min(WORLD_SIZE - VIEW_W, g.x - VIEW_W / 2));
+  g.cameraY = Math.max(0, Math.min(WORLD_SIZE - VIEW_H, g.y - VIEW_H / 2));
 
-  gameState.cameraX = Math.max(0, Math.min(WORLD_WIDTH - VIEW_WIDTH, gameState.x - VIEW_WIDTH / 2));
-  gameState.cameraY = Math.max(0, Math.min(WORLD_HEIGHT - VIEW_HEIGHT, gameState.y - VIEW_HEIGHT / 2));
+  ctx.fillStyle = "#1e3a8a";
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-  ctx.fillStyle = "#c7d2fe";
-  ctx.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
+  biomes.forEach((b) => {
+    const sx = b.x - g.cameraX;
+    const sy = b.y - g.cameraY;
+    if (sx + b.w < 0 || sy + b.h < 0 || sx > VIEW_W || sy > VIEW_H) return;
+    ctx.fillStyle = b.color;
+    ctx.fillRect(sx, sy, b.w, b.h);
 
-  regions.forEach((region) => {
-    const rx = region.x - gameState.cameraX;
-    const ry = region.y - gameState.cameraY;
-    if (rx + region.w < 0 || ry + region.h < 0 || rx > VIEW_WIDTH || ry > VIEW_HEIGHT) return;
-    ctx.fillStyle = region.color;
-    ctx.fillRect(rx, ry, region.w, region.h);
-    ctx.strokeStyle = "rgba(15,23,42,0.2)";
-    ctx.strokeRect(rx, ry, region.w, region.h);
-  });
-
-  settlements.forEach((s) => {
-    const sx = s.x - gameState.cameraX;
-    const sy = s.y - gameState.cameraY;
-    if (sx < -130 || sy < -130 || sx > VIEW_WIDTH + 130 || sy > VIEW_HEIGHT + 130) return;
-    ctx.beginPath();
-    ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = s.color;
-    ctx.globalAlpha = 0.75;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 12px sans-serif";
-    ctx.fillText(`${s.type}: ${s.name}`, sx - s.r + 6, sy - 8);
-    ctx.font = "11px sans-serif";
-    ctx.fillText(`${s.tribe} Tribe`, sx - s.r + 6, sy + 8);
-  });
-
-  const me = animalData[currentAnimalKey];
-  const px = gameState.x - gameState.cameraX;
-  const py = gameState.y - gameState.cameraY;
-  ctx.beginPath();
-  ctx.fillStyle = me.color;
-  ctx.arc(px, py, 14, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "19px sans-serif";
-  ctx.fillText(me.emoji, px - 10, py + 7);
-
-  positionEl.textContent = `World (${Math.round(gameState.x)}, ${Math.round(gameState.y)}) · Region: ${getCurrentRegion()}`;
-}
-
-function checkDiscoveries() {
-  settlements.forEach((s) => {
-    const dist = Math.hypot(s.x - gameState.x, s.y - gameState.y);
-    if (dist < s.r + 20) {
-      gameState.discovered.add(s.name);
-      const item = discoveriesEl.querySelector(`[data-name="${s.name}"]`);
-      if (item) item.textContent = `✅ ${s.name} (${s.tribe} ${s.type})`;
+    if (b.grass) {
+      ctx.fillStyle = "rgba(22,163,74,0.35)";
+      for (let i = 0; i < 30; i++) {
+        const gx = sx + ((i * 97) % b.w);
+        const gy = sy + ((i * 131) % b.h);
+        if (gx >= 0 && gx <= VIEW_W && gy >= 0 && gy <= VIEW_H) ctx.fillRect(gx, gy, 8, 8);
+      }
     }
   });
 
-  if (!gameState.won && gameState.discovered.size === settlements.length) {
-    gameState.won = true;
-    setTimeout(() => {
-      alert(`Legendary journey! As a ${animalData[currentAnimalKey].name}, you visited every city and village across all animal tribes.`);
-    }, 50);
+  settlements.forEach((s) => {
+    const sx = s.x - g.cameraX;
+    const sy = s.y - g.cameraY;
+    if (sx < -160 || sy < -160 || sx > VIEW_W + 160 || sy > VIEW_H + 160) return;
+    ctx.beginPath();
+    ctx.arc(sx, sy, s.radius, 0, Math.PI * 2);
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = 0.65;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "#0f172a";
+    ctx.stroke();
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(`${s.type} · ${s.faction}`, sx - s.radius + 6, sy);
+  });
+
+  drawPlayer();
+
+  const biome = getBiome(g.x, g.y);
+  el.coords.textContent = `X: ${Math.round(g.x)} · Y: ${Math.round(g.y)} · HP: ${Math.round(g.hp)}`;
+  el.regionName.textContent = biome.name;
+  el.realmStatus.textContent = `${WORLD_SIZE.toLocaleString()}x${WORLD_SIZE.toLocaleString()} realm · ${settlements.length} settlements`;
+}
+
+function drawPlayer() {
+  const g = state.game;
+  const a = animals[state.playerAnimal];
+  const px = g.x - g.cameraX;
+  const py = g.y - g.cameraY;
+  const frame = Math.floor(g.animationTick / 8) % 2;
+
+  ctx.fillStyle = "rgba(15,23,42,.35)";
+  ctx.beginPath();
+  ctx.ellipse(px, py + 18, 16, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#1f2937";
+  ctx.fillRect(px - 8, py + 9, 5, frame === 0 ? 10 : 6);
+  ctx.fillRect(px + 3, py + 9, 5, frame === 0 ? 6 : 10);
+
+  ctx.beginPath();
+  ctx.fillStyle = "#ffffff";
+  ctx.arc(px, py, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = "19px sans-serif";
+  ctx.fillStyle = a === animals.bear ? "#000" : "#111827";
+  ctx.fillText(a.emoji, px - 10, py + 7);
+}
+
+function update(dt) {
+  const g = state.game;
+  if (g.inBattle) return;
+
+  let moving = false;
+  if (keys.has("w") || keys.has("arrowup")) {
+    g.y -= g.speed * dt;
+    moving = true;
+  }
+  if (keys.has("s") || keys.has("arrowdown")) {
+    g.y += g.speed * dt;
+    moving = true;
+  }
+  if (keys.has("a") || keys.has("arrowleft")) {
+    g.x -= g.speed * dt;
+    moving = true;
+  }
+  if (keys.has("d") || keys.has("arrowright")) {
+    g.x += g.speed * dt;
+    moving = true;
+  }
+
+  g.x = Math.max(20, Math.min(WORLD_SIZE - 20, g.x));
+  g.y = Math.max(20, Math.min(WORLD_SIZE - 20, g.y));
+
+  if (moving) g.animationTick += 1;
+
+  checkSettlements();
+  maybeEncounter();
+  warTick();
+}
+
+function checkSettlements() {
+  const g = state.game;
+  settlements.forEach((s) => {
+    const d = Math.hypot(s.x - g.x, s.y - g.y);
+    if (d < s.radius + 18 && !g.discovered.has(s.name)) {
+      g.discovered.add(s.name);
+      g.logs.unshift(`Visited ${s.name} (${s.faction}).`);
+
+      if (!s.questGiven) {
+        s.questGiven = true;
+        const target = settlements[(Math.floor(Math.random() * settlements.length))];
+        g.quests.push({
+          id: `q-${questCounter++}`,
+          text: `Deliver treaty from ${s.name} to ${target.name}`,
+          target: target.name,
+          done: false,
+          reward: 8 + Math.floor(Math.random() * 8),
+        });
+        g.logs.unshift(`${s.faction} assigned a treaty quest.`);
+      }
+      resolveQuestAt(s.name);
+      renderQuestLog();
+      renderEvents();
+    }
+  });
+}
+
+function resolveQuestAt(settlementName) {
+  const g = state.game;
+  g.quests.forEach((q) => {
+    if (!q.done && q.target === settlementName) {
+      q.done = true;
+      g.hp = Math.min(100, g.hp + q.reward);
+      g.logs.unshift(`Quest complete: ${q.text}. +${q.reward} morale.`);
+    }
+  });
+}
+
+function maybeEncounter() {
+  const g = state.game;
+  const biome = getBiome(g.x, g.y);
+  const now = performance.now();
+  if (!biome.grass || now - g.lastEncounter < 2400) return;
+  g.lastEncounter = now;
+
+  const chance = 0.028;
+  if (Math.random() < chance) {
+    const enemy = Object.values(animals)[Math.floor(Math.random() * Object.keys(animals).length)];
+    startBattle(enemy);
   }
 }
 
-function update(delta) {
-  const amount = gameState.speed * 110 * delta;
-  if (keys.has("arrowup") || keys.has("w")) gameState.y -= amount;
-  if (keys.has("arrowdown") || keys.has("s")) gameState.y += amount;
-  if (keys.has("arrowleft") || keys.has("a")) gameState.x -= amount;
-  if (keys.has("arrowright") || keys.has("d")) gameState.x += amount;
+function startBattle(enemy) {
+  const g = state.game;
+  g.inBattle = true;
+  state.encounter = { enemy, enemyHp: 100, playerHp: Math.max(20, g.hp) };
+  el.battleTitle.textContent = `Wild ${enemy.name} challenges you!`;
+  el.battleDesc.textContent = "Tall-grass encounter battle. Choose an action.";
+  el.playerHp.value = state.encounter.playerHp;
+  el.enemyHp.value = state.encounter.enemyHp;
+  el.battleModal.classList.remove("hidden");
+}
 
-  gameState.x = Math.max(14, Math.min(WORLD_WIDTH - 14, gameState.x));
-  gameState.y = Math.max(14, Math.min(WORLD_HEIGHT - 14, gameState.y));
-  checkDiscoveries();
+function battleTurn(action) {
+  const g = state.game;
+  const e = state.encounter;
+  if (!e) return;
+
+  if (action === "run" && Math.random() < 0.65) {
+    endBattle("Escaped safely.");
+    return;
+  }
+
+  const baseAtk = g.atk + Math.floor(Math.random() * 8);
+  const skillBoost = action === "skill" ? 8 : 0;
+  e.enemyHp = Math.max(0, e.enemyHp - (baseAtk + skillBoost));
+
+  if (e.enemyHp <= 0) {
+    g.logs.unshift(`Won against wild ${e.enemy.name}.`);
+    g.hp = Math.min(100, g.hp + 10);
+    endBattle("Victory! You gained morale.");
+    renderEvents();
+    return;
+  }
+
+  const enemyHit = 10 + Math.floor(Math.random() * 10);
+  e.playerHp = Math.max(0, e.playerHp - Math.max(2, enemyHit - Math.floor(g.def / 2)));
+  if (e.playerHp <= 0) {
+    g.hp = 30;
+    g.logs.unshift(`Defeated by wild ${e.enemy.name}. You regrouped.`);
+    endBattle("You were overwhelmed and retreated.");
+    renderEvents();
+    return;
+  }
+
+  g.hp = e.playerHp;
+  el.playerHp.value = e.playerHp;
+  el.enemyHp.value = e.enemyHp;
+  el.battleDesc.textContent = `You used ${action}. Enemy retaliated.`;
+}
+
+function endBattle(message) {
+  state.game.inBattle = false;
+  el.battleDesc.textContent = message;
+  setTimeout(() => {
+    state.encounter = null;
+    el.battleModal.classList.add("hidden");
+  }, 600);
+}
+
+function warTick() {
+  const g = state.game;
+  const now = performance.now();
+  if (now - g.lastWarTick < 5000) return;
+  g.lastWarTick = now;
+
+  const fa = factions[Math.floor(Math.random() * factions.length)];
+  const swing = Math.floor(Math.random() * 7) - 3;
+  fa.stance = Math.max(-20, Math.min(20, fa.stance + swing));
+
+  const tension = factions.reduce((acc, f) => acc + Math.abs(f.stance), 0);
+  if (tension > 55 && Math.random() < 0.33) {
+    const f1 = factions[Math.floor(Math.random() * factions.length)];
+    const f2 = factions[Math.floor(Math.random() * factions.length)];
+    if (f1 !== f2) g.logs.unshift(`⚔️ Border clash between ${f1.name} and ${f2.name}.`);
+  } else {
+    g.logs.unshift(`Diplomatic shift in ${fa.name} (${fa.stance > 0 ? "peace" : "war"} leaning).`);
+  }
+  renderPolitics();
+  renderEvents();
+}
+
+function renderQuestLog() {
+  const g = state.game;
+  el.questList.innerHTML = "";
+  if (!g.quests.length) {
+    el.questList.innerHTML = "<li>Explore settlements to receive quests.</li>";
+    return;
+  }
+  g.quests.slice(-8).reverse().forEach((q) => {
+    const li = document.createElement("li");
+    li.textContent = `${q.done ? "✅" : "🧭"} ${q.text}`;
+    el.questList.appendChild(li);
+  });
+}
+
+function renderPolitics() {
+  el.politicsList.innerHTML = "";
+  factions.forEach((f) => {
+    const li = document.createElement("li");
+    const mood = f.stance >= 8 ? "Peaceful" : f.stance <= -8 ? "Aggressive" : "Unstable";
+    li.textContent = `${mood} · ${f.name} (${f.stance})`;
+    el.politicsList.appendChild(li);
+  });
+}
+
+function renderEvents() {
+  const g = state.game;
+  el.eventLog.innerHTML = "";
+  g.logs.slice(0, 8).forEach((line) => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    el.eventLog.appendChild(li);
+  });
 }
 
 function loop(now) {
-  if (!gamePanel.classList.contains("active")) return;
-  const delta = Math.min((now - gameState.last) / 1000, 0.033);
-  gameState.last = now;
-  update(delta);
-  drawWorld();
+  if (!state.game || !el.game.classList.contains("active")) return;
+  const dt = Math.min((now - state.game.lastFrame) / 1000, 0.033);
+  state.game.lastFrame = now;
+  update(dt);
+  renderWorld();
   requestAnimationFrame(loop);
 }
 
-startBtn.addEventListener("click", () => {
-  const animal = determineAnimal();
-  if (!animal) {
-    alert("Please answer every question first.");
-    return;
-  }
-  showResult(animal);
+el.backBtn.addEventListener("click", () => {
+  state.quizIndex = Math.max(0, state.quizIndex - 1);
+  renderQuestion();
 });
 
-playBtn.addEventListener("click", initGame);
-retakeBtn.addEventListener("click", () => switchPanel(quizPanel));
-restartBtn.addEventListener("click", () => {
-  renderQuiz();
-  switchPanel(quizPanel);
+el.nextBtn.addEventListener("click", () => {
+  if (state.answers[state.quizIndex] == null) return;
+  if (state.quizIndex < questions.length - 1) {
+    state.quizIndex += 1;
+    renderQuestion();
+  } else {
+    showResult();
+  }
 });
+
+el.playBtn.addEventListener("click", initGame);
+el.retakeBtn.addEventListener("click", () => {
+  state.quizIndex = 0;
+  state.answers = Array(questions.length).fill(null);
+  renderQuestion();
+  switchPanel(el.quiz);
+});
+
+el.restartBtn.addEventListener("click", () => window.location.reload());
+el.fsBtn.addEventListener("click", async () => {
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen();
+  } else {
+    await document.exitFullscreen();
+  }
+});
+
+el.attackBtn.addEventListener("click", () => battleTurn("attack"));
+el.skillBtn.addEventListener("click", () => battleTurn("skill"));
+el.runBtn.addEventListener("click", () => battleTurn("run"));
 
 window.addEventListener("keydown", (e) => keys.add(e.key.toLowerCase()));
 window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
 
-renderQuiz();
+renderQuestion();
