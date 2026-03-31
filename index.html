@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spirit Animal Realms</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="quiz" class="panel active" aria-live="polite">
+      <header class="quiz-header">
+        <h1>Spirit Animal Realms</h1>
+        <p>Answer the profile to unlock your champion and enter a living 30,000 x 30,000 world.</p>
+      </header>
+      <div class="progress-wrap">
+        <span id="progress-label">Question 1 / 5</span>
+        <div class="progress-bar"><span id="progress-fill"></span></div>
+      </div>
+      <article id="question-card" class="question-card"></article>
+      <div class="quiz-actions">
+        <button id="back-btn">Back</button>
+        <button id="next-btn" class="primary">Next</button>
+      </div>
+    </section>
+
+    <section id="result" class="panel" aria-live="polite">
+      <h2>Your Animal Champion</h2>
+      <div id="animal-card"></div>
+      <div class="row">
+        <button id="play-btn" class="primary">Enter Full-Screen Realm</button>
+        <button id="retake-btn">Retake Quiz</button>
+      </div>
+    </section>
+
+    <section id="game" class="panel" aria-live="polite">
+      <div class="topbar">
+        <div>
+          <strong id="player-name"></strong>
+          <div id="coords"></div>
+        </div>
+        <div>
+          <strong id="region-name"></strong>
+          <div id="realm-status"></div>
+        </div>
+      </div>
+      <canvas id="world" width="1280" height="720"></canvas>
+      <aside class="hud-grid">
+        <section>
+          <h3>Quest Log</h3>
+          <ul id="quest-list"></ul>
+        </section>
+        <section>
+          <h3>Politics & Wars</h3>
+          <ul id="politics-list"></ul>
+        </section>
+        <section>
+          <h3>Travel Notes</h3>
+          <ul id="event-log"></ul>
+        </section>
+      </aside>
+      <div class="row">
+        <button id="toggle-fullscreen" class="primary">Toggle Fullscreen</button>
+        <button id="restart-btn">Start Over</button>
+      </div>
+    </section>
+  </main>
+
+  <section id="battle-modal" class="modal hidden" aria-live="polite" hidden>
+    <div class="modal-card">
+      <h2 id="battle-title">Wild Encounter!</h2>
+      <p id="battle-desc"></p>
+      <div class="battle-bars">
+        <div><span>You</span><progress id="player-hp" max="100" value="100"></progress></div>
+        <div><span>Rival</span><progress id="enemy-hp" max="100" value="100"></progress></div>
+      </div>
+      <div class="row">
+        <button id="attack-btn" class="primary">Attack</button>
+        <button id="skill-btn">Skill</button>
+        <button id="run-btn">Run</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
